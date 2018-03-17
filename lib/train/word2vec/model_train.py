@@ -33,7 +33,7 @@ class Word2VecTrain(object):
         self.num_sampled = num_sampled
         self.vocabulary_size = vocabulary_size
 
-    def train(self, file_name, reverse_dictionary):
+    def train(self, file_name, reverse_dictionary, save_model=False):
 
         gragh = tf.Graph()
         with gragh.as_default():
@@ -94,11 +94,12 @@ class Word2VecTrain(object):
                             close_word = reverse_dictionary[nearest[k]]
                             log_str = "%s %s," % (log_str, close_word)
                         print(log_str)
-                        # if step % 500000 == 0:
-                        # self.model_save(session, "../../../model/", "model.ckpt", step)
+                        if step % 500000 == 0 and save_model:
+                            self.model_save(session, "../../../model/", "model.ckpt", step)
             final_embeddings = normalized_embeddings.eval()
             self.plot_labels(final_embeddings, reverse_dictionary)
-            # self.model_save(session, "../../../model/", "model.ckpt", num_steps)
+            if save_model:
+                self.model_save(session, "../../../model/", "model.ckpt", num_steps)
 
     def model_save(self, sess, path, model_name, global_step):
         saver = tf.train.Saver()
