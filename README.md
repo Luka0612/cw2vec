@@ -4,6 +4,7 @@
 
 ## 数据
 训练数据来源: 采用ZAKER新闻半年的新闻数据,vocabulary_size为200000
+
 汉字字符顺序解析: https://www.juhe.cn/docs/api/id/156
 
 
