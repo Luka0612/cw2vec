@@ -9,7 +9,7 @@
 
 
 ## 训练结果对比
-采用word2vec跟cw2vec结果对比,测试集为wordsim-20,测试方法为Spearman's rank corrlation coefficient
+采用word2vec跟cw2vec结果对比,测试集为wordsim-240,测试方法为Spearman's rank corrlation coefficient
 
 
 ## 目前进展
