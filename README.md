@@ -18,4 +18,4 @@ word2vec词向量已经训练完成,二维可视化结果为:https://github.com/
 cw2vec处于清洗数据阶段
 
 ## 其他对比论文
-https://arxiv.org/pdf/1704.04859.pdf?：对词语进行可视化CNN训练
+对词语进行可视化CNN训练：https://arxiv.org/pdf/1704.04859.pdf?
