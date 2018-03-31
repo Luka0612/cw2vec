@@ -21,7 +21,7 @@ font_set = FontProperties(fname=r"/Library/Fonts/Arial Unicode.ttf", size=15)
 
 class Word2VecTrain(object):
     def __init__(self, batch_size=128, embedding_size=128, skip_window=2, num_skips=4, valid_size=50,
-                 valid_window=100, num_sampled=64, vocabulary_size=200000, stroke_size=200000*20):
+                 valid_window=100, num_sampled=64, vocabulary_size=200000, stroke_size=8870673):
         self.batch_size = batch_size
         self.embedding_size = embedding_size
         self.skip_window = skip_window
