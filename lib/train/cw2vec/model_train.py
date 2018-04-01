@@ -3,7 +3,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-from batch.generate_batch import generate_batch
+from batch.generate_batch_cw import generate_batch_cw
 from numpy import *
 import math
 import os
@@ -19,9 +19,9 @@ from matplotlib.font_manager import FontProperties
 font_set = FontProperties(fname=r"/Library/Fonts/Arial Unicode.ttf", size=15)
 
 
-class Word2VecTrain(object):
-    def __init__(self, batch_size=128, embedding_size=128, skip_window=2, num_skips=4, valid_size=50,
-                 valid_window=100, num_sampled=64, vocabulary_size=200000, stroke_size=8870673):
+class Cw2VecTrain(object):
+    def __init__(self, batch_size=1280, embedding_size=128, skip_window=2, num_skips=4, valid_size=50,
+                 valid_window=100, num_sampled=64, vocabulary_size=200000, stroke_size=3875):
         self.batch_size = batch_size
         self.embedding_size = embedding_size
         self.skip_window = skip_window
@@ -34,7 +34,7 @@ class Word2VecTrain(object):
         self.vocabulary_size = vocabulary_size
         self.stroke_size = stroke_size
 
-    def train(self, file_name, reverse_dictionary, save_model=False):
+    def train(self, file_name, words_stroke_filename, reverse_dictionary, save_model=True):
 
         gragh = tf.Graph()
         with gragh.as_default():
@@ -47,7 +47,7 @@ class Word2VecTrain(object):
                 embeddings_stroke = tf.Variable(tf.random_uniform([self.stroke_size, self.embedding_size], -1.0, 1.0))
                 embed = tf.nn.embedding_lookup(embeddings_stroke, train_inputs)
 
-                embeddings = tf.Variable(tf.random_uniform([self.stroke_size, self.embedding_size], -1.0, 1.0))
+                embeddings = tf.Variable(tf.random_uniform([self.vocabulary_size, self.embedding_size], -1.0, 1.0))
 
                 nce_biases = tf.Variable(tf.zeros([self.vocabulary_size]))
             loss = tf.reduce_mean(
@@ -63,13 +63,13 @@ class Word2VecTrain(object):
 
             init = tf.initialize_all_variables()
 
-        num_steps = 2000001
+        num_steps = 20000001
 
         with tf.Session(graph=gragh) as session:
             init.run()
             print("Initialized")
 
-            generate = generate_batch(file_name, self.batch_size, self.num_skips, self.skip_window)
+            generate = generate_batch_cw(file_name, self.batch_size, self.num_skips, self.skip_window, reverse_dictionary, words_stroke_filename)
             average_loss = 0
             for step in range(num_steps):
                 batch_inputs, batch_labels = generate.next()
@@ -78,12 +78,12 @@ class Word2VecTrain(object):
                 _, loss_val = session.run([optimizer, loss], feed_dict=feed_dict)
                 average_loss += loss_val
 
-                if step % 2000 == 0:
+                if step % 20000 == 0:
                     if step > 0:
-                        average_loss /= 2000
+                        average_loss /= 20000
                     print("Average loss at step", step, ":", average_loss)
                     average_loss = 0
-                if step % 10000 == 0:
+                if step % 100000 == 0:
                     sim = similarity.eval()
                     for i in range(self.valid_size):
                         valid_word = reverse_dictionary[self.valid_examples[i]]
@@ -94,7 +94,7 @@ class Word2VecTrain(object):
                             close_word = reverse_dictionary[nearest[k]]
                             log_str = "%s %s," % (log_str, close_word)
                         print(log_str)
-                        if step % 500000 == 0 and save_model:
+                        if step % 5000000 == 0 and save_model:
                             self.model_save(session, "../../../model/", "model.ckpt", step)
             final_embeddings = normalized_embeddings.eval()
             self.plot_labels(final_embeddings, reverse_dictionary)

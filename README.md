@@ -15,7 +15,7 @@
 ## 目前进展
 word2vec词向量已经训练完成,二维可视化结果为:https://github.com/Luka0612/cw2vec/blob/master/data/tsne.png
 
-cw2vec处于清洗数据阶段
+cw2vec数据清洗完成,处于训练阶段
 
 ## 其他对比论文
 对词语进行可视化CNN训练：https://arxiv.org/pdf/1704.04859.pdf?
