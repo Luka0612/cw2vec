@@ -17,6 +17,7 @@ from pylab import mpl
 from matplotlib.font_manager import FontProperties
 
 font_set = FontProperties(fname=r"/Library/Fonts/Arial Unicode.ttf", size=15)
+current_relative_path = lambda x: os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), x))
 
 
 class Word2VecTrain(object):
@@ -95,11 +96,11 @@ class Word2VecTrain(object):
                             log_str = "%s %s," % (log_str, close_word)
                         print(log_str)
                         if step % 500000 == 0 and save_model:
-                            self.model_save(session, "../../../model/", "model.ckpt", step)
+                            self.model_save(session, current_relative_path("../../../model/word2vec/"), "model.ckpt", step)
             final_embeddings = normalized_embeddings.eval()
             self.plot_labels(final_embeddings, reverse_dictionary)
             if save_model:
-                self.model_save(session, "../../../model/", "model.ckpt", num_steps)
+                self.model_save(session, current_relative_path("../../../model/word2vec/"), "model.ckpt", num_steps)
 
     def model_save(self, sess, path, model_name, global_step):
         saver = tf.train.Saver()
