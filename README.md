@@ -20,6 +20,10 @@ word2vec词向量已经训练完成,二维可视化结果为:https://github.com/
 
 cw2vec数据清洗完成,处于训练阶段
 
+## cw2vec
+model_train_sum_sroke训练时间很长,还涉及到超参数的优化等,目前采用的优化算法是tf.train.GradientDescentOptimizer(),学习率是0.1
+由于还涉及到与word2vec还有Character-level的比较,尽量使得参数比较相近
+
 ## 其他对比论文
 对词语进行可视化CNN训练：https://arxiv.org/pdf/1704.04859.pdf?
 

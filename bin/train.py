@@ -6,8 +6,7 @@ sys.path.append('../lib/train')
 
 from word2vec.model_train import Word2VecTrain
 
-from cw2vec.model_train import Cw2VecTrain
-
+from cw2vec.model_train_sum_stroke import Cw2VecSumStrokeTrain
 
 def word2vec_train():
     f = open("../data/word_index.txt")
@@ -31,9 +30,8 @@ def cw2vec_train():
 
     f.close()
 
-    W2V = Cw2VecTrain()
+    W2V = Cw2VecSumStrokeTrain()
     W2V.train(os.path.abspath("../data/train_data.txt"), os.path.abspath("../data/words_stroke.txt"), dict_reverse_word_index)
-
 
 if __name__ == "__main__":
     cw2vec_train()

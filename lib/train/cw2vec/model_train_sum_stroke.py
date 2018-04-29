@@ -2,8 +2,9 @@
 # -*- coding:utf-8 -*-
 import sys
 import os
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-from batch.generate_batch_cw import generate_batch_cw
+from batch.generate_batch_cw_sum_stroke import generate_batch_cw, generate_batch_cw_sum_stroke
 from numpy import *
 import math
 import os
@@ -20,9 +21,9 @@ font_set = FontProperties(fname=r"/Library/Fonts/Arial Unicode.ttf", size=15)
 current_relative_path = lambda x: os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), x))
 
 
-class Cw2VecTrain(object):
-    def __init__(self, batch_size=1280, embedding_size=128, skip_window=2, num_skips=4, valid_size=50,
-                 valid_window=100, num_sampled=64, vocabulary_size=200000, stroke_size=3875):
+class Cw2VecSumStrokeTrain(object):
+    def __init__(self, batch_size=128, embedding_size=128, skip_window=2, num_skips=4, valid_size=50,
+                 valid_window=100, num_sampled=64, vocabulary_size=200000, stroke_size=3876, stroke_seq_length=363):
         self.batch_size = batch_size
         self.embedding_size = embedding_size
         self.skip_window = skip_window
@@ -34,19 +35,30 @@ class Cw2VecTrain(object):
         self.num_sampled = num_sampled
         self.vocabulary_size = vocabulary_size
         self.stroke_size = stroke_size
+        self.stroke_seq_length = stroke_seq_length
 
     def train(self, file_name, words_stroke_filename, reverse_dictionary, save_model=True):
 
         gragh = tf.Graph()
         with gragh.as_default():
 
-            train_inputs = tf.placeholder(tf.int32, shape=[self.batch_size])
+            train_inputs = tf.placeholder(tf.int32, shape=[self.batch_size, self.stroke_seq_length])
             train_labels = tf.placeholder(tf.int32, shape=[self.batch_size, 1])
             valid_dataset = tf.constant(self.valid_examples, dtype=tf.int32)
 
             with tf.device('/cpu:0'):
                 embeddings_stroke = tf.Variable(tf.random_uniform([self.stroke_size, self.embedding_size], -1.0, 1.0))
-                embed = tf.nn.embedding_lookup(embeddings_stroke, train_inputs)
+                # 将最后的stroke为0
+                one_hot = tf.one_hot(0, self.stroke_size, dtype=tf.float32)
+                one_hot = tf.transpose(
+                    tf.reshape(tf.tile(one_hot, [self.embedding_size]), shape=[self.embedding_size, self.stroke_size]))
+                embeddings_stroke = embeddings_stroke - embeddings_stroke[0]*one_hot
+                #
+                lookup_embed = tf.nn.embedding_lookup(embeddings_stroke, train_inputs)
+                stroke_length = get_length(lookup_embed)
+                embed = []
+                for i in range(self.batch_size):
+                    embed.append(tf.reduce_sum(lookup_embed[i][:stroke_length[i]], 0))
 
                 embeddings = tf.Variable(tf.random_uniform([self.vocabulary_size, self.embedding_size], -1.0, 1.0))
 
@@ -55,7 +67,7 @@ class Cw2VecTrain(object):
                 tf.nn.nce_loss(weights=embeddings, biases=nce_biases, labels=train_labels, inputs=embed,
                                num_sampled=self.num_sampled, num_classes=self.vocabulary_size))
 
-            optimizer = tf.train.GradientDescentOptimizer(1.0).minimize(loss)
+            optimizer = tf.train.GradientDescentOptimizer(0.1).minimize(loss)
 
             norm = tf.sqrt(tf.reduce_sum(tf.square(embeddings), 1, keep_dims=True))
             normalized_embeddings = embeddings / norm
@@ -64,13 +76,14 @@ class Cw2VecTrain(object):
 
             init = tf.initialize_all_variables()
 
-        num_steps = 20000001
+        num_steps = 2000001
 
         with tf.Session(graph=gragh) as session:
             init.run()
             print("Initialized")
 
-            generate = generate_batch_cw(file_name, self.batch_size, self.num_skips, self.skip_window, reverse_dictionary, words_stroke_filename)
+            generate = generate_batch_cw(file_name, self.batch_size, self.num_skips, self.skip_window,
+                                         reverse_dictionary, words_stroke_filename, self.stroke_seq_length)
             average_loss = 0
             for step in range(num_steps):
                 batch_inputs, batch_labels = generate.next()
@@ -79,12 +92,12 @@ class Cw2VecTrain(object):
                 _, loss_val = session.run([optimizer, loss], feed_dict=feed_dict)
                 average_loss += loss_val
 
-                if step % 20000 == 0:
+                if step % 2000 == 0:
                     if step > 0:
-                        average_loss /= 20000
+                        average_loss /= 2000
                     print("Average loss at step", step, ":", average_loss)
                     average_loss = 0
-                if step % 100000 == 0:
+                if step % 10000 == 0:
                     sim = similarity.eval()
                     for i in range(self.valid_size):
                         valid_word = reverse_dictionary[self.valid_examples[i]]
@@ -95,8 +108,9 @@ class Cw2VecTrain(object):
                             close_word = reverse_dictionary[nearest[k]]
                             log_str = "%s %s," % (log_str, close_word)
                         print(log_str)
-                        if step % 5000000 == 0 and save_model:
-                            self.model_save(session, current_relative_path("../../../model/cw2vec/"), "model.ckpt", step)
+                        if step % 500000 == 0 and save_model:
+                            self.model_save(session, current_relative_path("../../../model/cw2vec/"), "model.ckpt",
+                                            step)
             final_embeddings = normalized_embeddings.eval()
             self.plot_labels(final_embeddings, reverse_dictionary)
             if save_model:
@@ -124,3 +138,24 @@ class Cw2VecTrain(object):
         low_dim_embs = pca.fit_transform(X)
         labels = [reverse_dictionary[i].decode("utf-8") for i in range(plot_only)]
         self.plot_with_labels(low_dim_embs, labels)
+
+
+def get_length(seq):
+    used = tf.sign(tf.reduce_max(tf.abs(seq), 2))
+    seq_len = tf.reduce_sum(used, 1)
+    seq_len = tf.cast(seq_len, tf.int32)
+    return seq_len
+
+if __name__ == '__main__':
+    a = tf.constant([[0, 0, 0], [4, 5, 6], [7, 8, 9], [10, 11, 12]])
+    b = tf.constant([[1, 2, 0, 0], [2, 3, 1, 0]])
+    input_leng = [2, 3]
+    embed = tf.nn.embedding_lookup(a, b)
+    seq_len = get_length(embed)
+    # c = tf.reduce_sum(embed, 1)
+    output = []
+    for i in range(2):
+        output.append(tf.reduce_sum(embed[i][:seq_len[i]], 0))
+
+    session = tf.Session()
+    print session.run(output)
