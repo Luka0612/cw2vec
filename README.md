@@ -25,7 +25,15 @@ cw2vec训练&调参会花费较长时间,这个时间段会考虑先实现Charac
 model_train_sum_sroke训练时间很长,还涉及到超参数的优化等,目前采用的优化算法是tf.train.GradientDescentOptimizer(),学习率是0.1。
 由于还涉及到与word2vec还有Character-level的比较,尽量使得参数比较相近
 
-由于我的渣电脑训练的比较慢,而且涉及200000vocabulary还有半年的ZAKER新闻数据,训练还需要段时间,后面可能转到GPU
+由于我的渣电脑训练的比较慢,而且涉及200000vocabulary还有半年的ZAKER新闻数据,训练还需要段时间,后面可能转到采用GPU进行训练
+
+## Character-level2vec
+Learning Character-level Compositionality with Visual Features是每个字为单位进行CNN处理后输入RNN预测标题分类，
+由于我们是只训练词向量且为了具有可比性采用跟Word2vec相同的架构，所以我对其进行了些修改，采用以词作为单位进行CNN处理，CNN结果预测上下文（类似word2vec）训练词向量。
+暂时还不知道以词作为单位对CNN效果是否不够好（因为词的长度是不同的，有两字词，四字词等）。
+如果以字作为单位的话，可以对词的每个字进行CNN处理，然后进行RNN形成词向量，再根据上下文进行训练词向量
+## stroke-rnn2vec
+个人的一些想法，是否可以将字符（如词“大人”的字符13434）进行RNN处理，从而考虑字符的书写顺序，然后结合上下文训练词向量
 
 ## 其他对比论文
 对词语进行可视化CNN训练：https://arxiv.org/pdf/1704.04859.pdf?
