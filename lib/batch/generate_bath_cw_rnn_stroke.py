@@ -64,8 +64,8 @@ if __name__ == "__main__":
         dict_reverse_word_index2[int(i[1])] = i[0]
 
     f.close()
-
+    # strokes最大长度是124
     generate = generate_batch_cw_rnn_stroke("../../data/train_data.txt", 8, 2, 1, dict_reverse_word_index2,
-                                 "../../data/words_stroke.txt", 363)
+                                 "../../data/words_stroke.txt", 124)
 
     print generate.next()

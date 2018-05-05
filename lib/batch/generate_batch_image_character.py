@@ -74,6 +74,9 @@ if __name__ == '__main__':
 
     f.close()
 
-    all_image_data = get_all_image_data("../../data/text_image_pil_length_4/", dict_reverse_word_index2)
+    generate = generate_batch_character_level("../../data/train_data.txt", 8, 2, 1, dict_reverse_word_index2,
+                                 "../../data/text_image_pil_length_4/")
+
+    print generate.next()
 
 
