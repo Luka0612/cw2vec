@@ -29,7 +29,7 @@ def main():
         text = i[0].decode("utf-8")
         # pygame_text2image(text, os.path.join("../../data/text_image", text+".png"))
         if len(text) <= 4:
-            pil_text2image(text, os.path.join("/Users/xuxiaolong/text_image_pil_length_4", text+".png"))
+            pil_text2image(text, os.path.join("../../data/text_image_pil_length_4", text+".png"))
 
 
 if __name__ == '__main__':
