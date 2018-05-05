@@ -24,6 +24,44 @@ def get_dict_word_stroke_index(words_stroke_filename, dict_reverse_word_index, m
     return dict_word_stroke_index
 
 
+def generate_batch_cw(file_name, batch_size, num_skips, skip_windows, dict_reverse_word_index, words_stroke_filename,
+                      stroke_seq_length):
+
+    assert batch_size % num_skips == 0
+    assert num_skips <= 2 * skip_windows
+    generate_word = generate_one(file_name, num_skips, skip_windows)
+    dict_word_stroke_index = get_dict_word_stroke_index(words_stroke_filename, dict_reverse_word_index,
+                                                        stroke_seq_length)
+
+    while True:
+
+        batch = np.ndarray(shape=(batch_size, stroke_seq_length), dtype=np.int32)
+        labels = np.ndarray(shape=(batch_size, 1), dtype=np.int32)
+        for i in range(batch_size // num_skips):
+
+            tuple_word = generate_word.next()
+            while not tuple_word:
+                generate_word = generate_one(file_name, num_skips, skip_windows)
+                tuple_word = generate_word.next()
+            while True:
+                ner_in_dict_word_stroke_index = True
+                for j in range(num_skips):
+                    if tuple_word[j][0] not in dict_word_stroke_index:
+                        ner_in_dict_word_stroke_index = False
+                if ner_in_dict_word_stroke_index:
+                    break
+                else:
+                    tuple_word = generate_word.next()
+                    while not tuple_word:
+                        generate_word = generate_one(file_name, num_skips, skip_windows)
+                        tuple_word = generate_word.next()
+
+            for j in range(num_skips):
+                batch[i * num_skips + j] = dict_word_stroke_index[tuple_word[j][0]]
+                labels[i * num_skips + j, 0] = tuple_word[j][1]
+        yield batch, labels
+
+
 def generate_batch_cw_rnn_stroke(file_name, batch_size, num_skips, skip_windows, dict_reverse_word_index,
                                  words_stroke_filename, stroke_seq_length):
     dict_word_stroke_index = get_dict_word_stroke_index(words_stroke_filename, dict_reverse_word_index,
