@@ -25,7 +25,9 @@ cw2vec训练&调参会花费较长时间,这个时间段会考虑先实现Charac
 model_train_sum_sroke训练时间很长,还涉及到超参数的优化等,目前采用的优化算法是tf.train.GradientDescentOptimizer(),学习率是0.1。
 由于还涉及到与word2vec还有Character-level的比较,尽量使得参数比较相近
 
-由于我的渣电脑训练的比较慢,而且涉及200000vocabulary还有半年的ZAKER新闻数据,训练还需要段时间,后面可能转到采用GPU进行训练
+由于我的渣电脑训练的比较慢,而且涉及200000vocabulary还有半年的ZAKER新闻数据,训练还需要段时间
+
+MMP，不小心关掉训练了。。。。得重新开始训练，哭嘤嘤，还是等服务器吧
 
 ## Character-level2vec
 Learning Character-level Compositionality with Visual Features是每个字为单位进行CNN处理后输入RNN预测标题分类，
