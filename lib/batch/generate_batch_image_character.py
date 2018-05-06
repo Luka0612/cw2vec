@@ -63,6 +63,41 @@ def generate_batch_character_level(file_name, batch_size, num_skips, skip_window
             tuple_words = generate_word.next()
 
 
+def generate_batch_image_character_level(file_name, batch_size, num_skips, skip_windows, dict_reverse_word_index, words_image_filename):
+    assert batch_size % num_skips == 0
+    assert num_skips <= 2 * skip_windows
+    generate_word = generate_one(file_name, num_skips, skip_windows)
+    all_image_data = get_all_image_data(words_image_filename, dict_reverse_word_index)
+    image_shape = all_image_data.values()[0].shape
+
+    while True:
+
+        batch = np.ndarray(shape=(batch_size, image_shape[0], image_shape[1]), dtype=np.int32)
+        labels = np.ndarray(shape=(batch_size, 1), dtype=np.int32)
+        for i in range(batch_size // num_skips):
+
+            tuple_word = generate_word.next()
+            while not tuple_word:
+                generate_word = generate_one(file_name, num_skips, skip_windows)
+                tuple_word = generate_word.next()
+            while True:
+                ner_in_dict_word_stroke_index = True
+                for j in range(num_skips):
+                    if tuple_word[j][0] not in all_image_data:
+                        ner_in_dict_word_stroke_index = False
+                if ner_in_dict_word_stroke_index:
+                    break
+                else:
+                    tuple_word = generate_word.next()
+                    while not tuple_word:
+                        generate_word = generate_one(file_name, num_skips, skip_windows)
+                        tuple_word = generate_word.next()
+
+            for j in range(num_skips):
+                batch[i * num_skips + j] = all_image_data[tuple_word[j][0]]
+                labels[i * num_skips + j, 0] = tuple_word[j][1]
+        yield batch, labels
+
 if __name__ == '__main__':
     import collections
 
