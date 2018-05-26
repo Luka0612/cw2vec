@@ -18,7 +18,7 @@
 ## 目前进展
 word2vec词向量已经训练完成,二维可视化结果为:https://github.com/Luka0612/cw2vec/blob/master/data/tsne.png
 
-cw2vec数据清洗完成,处于训练阶段
+cw2vec数据清洗完成,训练完成，抽空会对训练的结果进行对比，同时将模型分享出来
 
 cw2vec训练&调参会花费较长时间,这个时间段会考虑先实现Character-level to vec
 ## cw2vec
@@ -27,7 +27,6 @@ model_train_sum_sroke训练时间很长,还涉及到超参数的优化等,目前
 
 由于我的渣电脑训练的比较慢,而且涉及200000vocabulary还有半年的ZAKER新闻数据,训练还需要段时间
 
-MMP，不小心关掉训练了。。。。得重新开始训练，哭嘤嘤，还是等服务器吧
 
 ## Character-level2vec
 Learning Character-level Compositionality with Visual Features是每个字为单位进行CNN处理后输入RNN预测标题分类，
