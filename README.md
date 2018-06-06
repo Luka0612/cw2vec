@@ -16,7 +16,7 @@
 ## 训练结果对比
 采用word2vec跟cw2vec结果对比,测试集为[wordsim-240](https://github.com/Luka0612/cw2vec/tree/master/data/words-240%E5%8F%91%E5%B8%83),测试方法为Spearman's rank corrlation coefficient
 
-暂由于其他项目还没空对模型进行对比,所以将模型&训练数据上传到微云,有兴趣的朋友可以做下测试,cw2vec优势:
+暂由于其他项目还没空对模型进行对比,所以将模型&训练数据上传到[微云](https://share.weiyun.com/529Oiwc),有兴趣的朋友可以做下测试,cw2vec优势:
 * cw2vec使得对没有在训练数据中出现的单词（词汇表外的单词）计算单词的表征成为了可能
 * 对于近义词间可以考虑字符的相似性如学校&学生都存在"学"相同字符
 
